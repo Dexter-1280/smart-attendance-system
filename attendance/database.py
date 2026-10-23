@@ -46,9 +46,48 @@ def initialize_database():
                 entry_time TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'Present',
                 FOREIGN KEY(student_id) REFERENCES students(id),
-                UNIQUE(student_id, attendance_date)
+                UNIQUE(student_id, session_id)
             )
         """)
+
+        unique_indexes = connection.execute(
+            "PRAGMA index_list('attendance')"
+        ).fetchall()
+
+        for index in unique_indexes:
+            if not index["unique"]:
+                continue
+
+            index_name = index["name"].replace('"', '""')
+            columns = connection.execute(
+                f'PRAGMA index_info("{index_name}")'
+            ).fetchall()
+            column_names = [column["name"] for column in columns]
+
+            if column_names == ["student_id", "attendance_date"]:
+                connection.execute("""
+                    CREATE TABLE attendance_new (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        student_id INTEGER NOT NULL,
+                        session_id TEXT NOT NULL,
+                        attendance_date TEXT NOT NULL,
+                        entry_time TEXT NOT NULL,
+                        status TEXT NOT NULL DEFAULT 'Present',
+                        FOREIGN KEY(student_id) REFERENCES students(id),
+                        UNIQUE(student_id, session_id)
+                    )
+                """)
+
+                connection.execute("""
+                    INSERT INTO attendance_new
+                    (id, student_id, session_id, attendance_date, entry_time, status)
+                    SELECT id, student_id, session_id, attendance_date, entry_time, status
+                    FROM attendance
+                """)
+
+                connection.execute("DROP TABLE attendance")
+                connection.execute("ALTER TABLE attendance_new RENAME TO attendance")
+                break
 
         connection.execute("""
             CREATE TABLE IF NOT EXISTS sessions (

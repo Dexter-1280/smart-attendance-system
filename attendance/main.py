@@ -5,7 +5,6 @@ from PIL import Image, ImageTk, ImageOps
 import os
 import time
 import shutil
-
 from database import (
     initialize_database,
     register_student,
@@ -18,6 +17,7 @@ from database import (
 )
 
 from face_engine import FaceEngine
+from attendance_report import generate_attendance_report
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -33,7 +33,6 @@ class SmartAttendanceApp:
         self.root.minsize(950, 650)
 
         initialize_database()
-
         self.face_engine = FaceEngine()
         self.mode = "idle"
         self.camera_running = False
@@ -157,6 +156,12 @@ class SmartAttendanceApp:
             control_frame,
             text="Export Attendance CSV",
             command=self.export_records
+        ).pack(fill="x", pady=5)
+
+        ttk.Button(
+            control_frame,
+            text="Generate Attendance Report",
+            command=self.generate_report
         ).pack(fill="x", pady=5)
 
         ttk.Button(
@@ -433,7 +438,7 @@ class SmartAttendanceApp:
                     else:
                         self.status_var.set(
                             f"{student['name']} already has attendance "
-                            "recorded today."
+                            "recorded in this session."
                         )
 
                 except Exception as error:
@@ -656,6 +661,27 @@ class SmartAttendanceApp:
         except Exception as error:
             messagebox.showerror(
                 "Export Failed",
+                str(error)
+            )
+
+    def generate_report(self):
+        try:
+            filename, report = generate_attendance_report()
+            if report.empty:
+                messagebox.showinfo(
+                    "Attendance Report",
+                    f"No registered students or completed sessions were found.\n\nSaved to:\n{filename}"
+                )
+                return
+
+            messagebox.showinfo(
+                "Attendance Report Generated",
+                f"Attendance report saved to:\n{filename}\n\n"
+                f"Students included: {len(report)}"
+            )
+        except Exception as error:
+            messagebox.showerror(
+                "Report Generation Failed",
                 str(error)
             )
 
