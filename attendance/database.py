@@ -26,7 +26,7 @@ def get_connection():
 
 def initialize_database():
     with get_connection() as connection:
-        connection.execute("""
+        connection.executescript("""
             CREATE TABLE IF NOT EXISTS students (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -34,10 +34,8 @@ def initialize_database():
                 face_encoding TEXT NOT NULL,
                 photo_path TEXT NOT NULL,
                 created_at TEXT NOT NULL
-            )
-        """)
+            );
 
-        connection.execute("""
             CREATE TABLE IF NOT EXISTS attendance (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_id INTEGER NOT NULL,
@@ -47,7 +45,7 @@ def initialize_database():
                 status TEXT NOT NULL DEFAULT 'Present',
                 FOREIGN KEY(student_id) REFERENCES students(id),
                 UNIQUE(student_id, session_id)
-            )
+            );
         """)
 
         unique_indexes = connection.execute(
