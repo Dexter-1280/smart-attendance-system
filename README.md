@@ -6,7 +6,7 @@ The Smart Attendance System is a Python-based desktop application that automates
 
 The project aims to make attendance management faster, more convenient, and less prone to manual errors.
 
-#Main Features
+# Main Features
 Student Registration: Register students using their name, roll number, and photograph.
 Face Recognition: Use a webcam to identify registered students.
 Automatic Attendance: Record attendance when a registered student's face is recognized.
