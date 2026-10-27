@@ -1,4 +1,4 @@
-# smart attendance project
+# Smart Attendance System 
 
 #  Project Overview
 
